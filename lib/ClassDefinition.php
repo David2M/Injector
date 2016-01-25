@@ -3,11 +3,12 @@ namespace David2M\Injector;
 
 class ClassDefinition
 {
+
     /* @var string */
     protected $className;
 
     /* @var InstanceDefinition[] */
-    protected $instances = [];
+    protected $instanceDefs = [];
 
     /**
      * @param string $className
@@ -32,12 +33,12 @@ class ClassDefinition
      */
     public function getInstance($name = 'default')
     {
-        if (isset($this->instances[$name])) {
-            return $this->instances[$name];
+        if (isset($this->instanceDefs[$name])) {
+            return $this->instanceDefs[$name];
         }
 
         $instance = new InstanceDefinition($this, $name);
-        $this->instances[$name] = $instance;
+        $this->instanceDefs[$name] = $instance;
 
         return $instance;
     }

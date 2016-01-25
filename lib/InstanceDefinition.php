@@ -14,7 +14,7 @@ class InstanceDefinition
     protected $singleton = true;
 
     /* @var MethodDefinition[] */
-    protected $methods = [];
+    protected $methodDefs = [];
 
     /* @var object */
     protected $instance = null;
@@ -67,12 +67,12 @@ class InstanceDefinition
      */
     public function getMethod($methodName)
     {
-        if (isset($this->methods[$methodName])) {
-            return $this->methods[$methodName];
+        if (isset($this->methodDefs[$methodName])) {
+            return $this->methodDefs[$methodName];
         }
 
         $method = new MethodDefinition($this, $methodName);
-        $this->methods[$methodName] = $method;
+        $this->methodDefs[$methodName] = $method;
 
         return $method;
     }
@@ -82,7 +82,7 @@ class InstanceDefinition
      */
     public function getMethods()
     {
-        return $this->methods;
+        return $this->methodDefs;
     }
 
     /**
