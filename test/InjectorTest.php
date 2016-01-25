@@ -143,7 +143,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf($className, $obj);
     }
 
-    public function testd()
+    public function testMakeTwoDifferentInstancesOfTheSameClass()
     {
         $className = 'User';
         $classAndInstanceNameOne = $className . '#david';
