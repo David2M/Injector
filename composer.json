@@ -1,0 +1,17 @@
+{
+  "name": "david2m/injector",
+  "description": "PHP dependency injector.",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "David2M",
+      "email": "david2m@hotmail.co.uk"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "David2M\\Injector\\": "lib/"
+    }
+  }
+}
