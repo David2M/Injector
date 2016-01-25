@@ -13,7 +13,7 @@ class Injector implements Container
     protected $aliases = [];
 
     /* @var ClassDefinition[] */
-    protected $classes = [];
+    protected $classDefs = [];
 
     /**
      * Mappings of interfaces to concrete classes.
@@ -42,23 +42,25 @@ class Injector implements Container
         return (isset($this->aliases[$alias])) ? $this->aliases[$alias] : null;
     }
 
-    public function getClass($className)
+    public function getInstanceDef($className)
     {
+        list($className, $instanceName) = $this->extractClassAndInstanceName($className);
         $className = (isset($this->aliases[$className])) ? $this->aliases[$className] : $className;
 
-        if (isset($this->classes[$className])) {
-            return $this->classes[$className];
+        if (isset($this->classDefs[$className])) {
+            $classDef = $this->classDefs[$className];
+        }
+        else {
+            $classDef = new ClassDefinition($className);
+            $this->classDefs[$className] = $classDef;
         }
 
-        $class = new ClassDefinition($className);
-        $this->classes[$className] = $class;
-
-        return $class;
+        return $classDef->getInstance($instanceName);
     }
 
     public function getMethod($className, $methodName)
     {
-        return $this->getClass($className)->getMethod($methodName);
+        return $this->getInstanceDef($className)->getMethod($methodName);
     }
 
     public function getConstructor($className)
@@ -97,7 +99,7 @@ class Injector implements Container
     {
         foreach ($objects as $key => $object) {
             $className = get_class($object);
-            $this->getClass($className)->setInstance($object);
+            $this->getInstanceDef($className)->setInstance($object);
 
             if (is_string($key)) {
                 $this->setMapping($key, $className);
@@ -117,29 +119,29 @@ class Injector implements Container
      */
     public function make($className, array $params = [])
     {
-        // Get the class definition
-        $class = $this->getClass($className);
+        // Get the instance definition
+        $instanceDef = $this->getInstanceDef($className);
 
-        // Is the specified class defined as a singleton and does an instance of the class already exist?
+        // Is the specified instance defined as a singleton and does an instance of the instance definition already exist?
         // If so, return the instance.
-        if ($class->isSingleton() && $class->hasInstance()) {
-            return $class->getInstance();
+        if ($instanceDef->isSingleton() && $instanceDef->hasInstance()) {
+            return $instanceDef->getInstance();
         }
 
         // If a factory exists for the specified class name then delegate the creation of the object to the factory.
-        $className = $class->getClassName();
+        $className = $instanceDef->getClassName();
         if (($factory = $this->getFactory($className)) !== null) {
             $object = $this->invoke($factory, ['className' => $className]);
         }
         else {
-            $object = $this->createObject($className, $params);
+            $object = $this->createObject($instanceDef, $params);
         }
 
-        if ($class->isSingleton()) {
-            $class->setInstance($object);
+        if ($instanceDef->isSingleton()) {
+            $instanceDef->setInstance($object);
         }
 
-        foreach ($class->getMethods() as $methodName => $method) {
+        foreach ($instanceDef->getMethods() as $methodName => $method) {
             if (!is_callable([$object, $methodName])) {
                 throw new InjectorException(sprintf(self::EX_METHOD_NOT_CALLABLE, $className, $methodName));
             }
@@ -170,6 +172,20 @@ class Injector implements Container
         }
 
         return $this->invokeFunction($callable, $params);
+    }
+
+    /**
+     * @param string $className
+     *
+     * @return array
+     */
+    private function extractClassAndInstanceName($className)
+    {
+        if (substr_count($className, '#') !== 1) {
+            return [$className, 'default'];
+        }
+
+        return explode('#', $className);
     }
 
     /**
@@ -223,15 +239,16 @@ class Injector implements Container
     }
 
     /**
-     * @param string $className
+     * @param InstanceDefinition $instanceDef
      * @param array[string]mixed
      *
      * @return object
      *
      * @throws InjectorException
      */
-    private function createObject($className, array $params)
+    private function createObject($instanceDef, array $params)
     {
+        $className = $instanceDef->getClassName();
         try {
             $reflectionClass = new \ReflectionClass($className);
         }
@@ -243,7 +260,9 @@ class Injector implements Container
         if ($constructor === null) {
             return $reflectionClass->newInstanceWithoutConstructor();
         }
-        $parameters = $this->getParameters($constructor->getParameters(), $params);
+
+        $methodDef = $instanceDef->getMethod('__construct');
+        $parameters = $this->getParameters($constructor->getParameters(), $params, $methodDef);
 
         return $reflectionClass->newInstanceArgs($parameters);
     }
@@ -251,12 +270,13 @@ class Injector implements Container
     /**
      * @param \ReflectionParameter[] $reflectionParams
      * @param array[string]mixed $params
+     * @param MethodDefinition $methodDef
      *
      * @return mixed[]
      *
      * @throws InjectorException
      */
-    private function getParameters(array $reflectionParams, array $params) {
+    private function getParameters(array $reflectionParams, array $params, MethodDefinition $methodDef = null) {
 
         $parameters = [];
         foreach ($reflectionParams as $reflectionParam) {
@@ -265,7 +285,7 @@ class Injector implements Container
                 $parameters[] = $this->resolveParameter($params[$paramName], $reflectionParam);
             }
             else {
-                $parameters[] = $this->getParameter($reflectionParam);
+                $parameters[] = $this->getParameter($reflectionParam, $methodDef);
             }
         }
 
@@ -274,22 +294,19 @@ class Injector implements Container
 
     /**
      * @param \ReflectionParameter $reflectionParam
+     * @param MethodDefinition $methodDef
      *
      * @return mixed
      *
      * @throws InjectorException
      */
-    private function getParameter(\ReflectionParameter $reflectionParam)
+    private function getParameter(\ReflectionParameter $reflectionParam, MethodDefinition $methodDef = null)
     {
-        $className = $reflectionParam->getDeclaringClass()->getName();
-        $methodName = $reflectionParam->getDeclaringFunction()->getName();
         $paramName = $reflectionParam->getName();
 
-        $method = $this->getClass($className)->getMethod($methodName);
-
         // Has a value been set for this parameter?
-        if ($method->hasParam($paramName)) {
-            $param = $method->getParam($paramName);
+        if ($methodDef !== null && $methodDef->hasParam($paramName)) {
+            $param = $methodDef->getParam($paramName);
             return $this->resolveParameter($param, $reflectionParam);
         }
 
@@ -322,13 +339,20 @@ class Injector implements Container
             return $reflectionParam->getDefaultValue();
         }
 
+        $className = $reflectionParam->getDeclaringClass()->getName();
+        $methodName = $reflectionParam->getDeclaringFunction()->getName();
+
         throw new InjectorException(sprintf(self::EX_PARAM_NOT_FOUND, $className, $methodName, $paramName));
     }
 
     /**
      * Resolve a supplied parameter to its final value.
-     * A supplied parameter may be a callable so therefore must be called to get its
-     * final value.
+     *
+     * A supplied parameter may be:
+     * 1. A string but the actual required parameter is an object so therefore the string(class name)
+     * must be resolved into the actual required object.
+     *
+     * 2. A callable so therefore must be invoked to get its final value.
      *
      * @param mixed $param
      * @param \ReflectionParameter $reflectionParam
@@ -339,6 +363,10 @@ class Injector implements Container
      */
     private function resolveParameter($param, \ReflectionParameter $reflectionParam)
     {
+        if (is_string($param) && $reflectionParam->getClass() !== null) {
+            return $this->make($param);
+        }
+
         return (is_callable($param) && !$reflectionParam->isCallable()) ? $this->invoke($param) : $param;
     }
 

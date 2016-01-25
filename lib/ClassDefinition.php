@@ -6,14 +6,8 @@ class ClassDefinition
     /* @var string */
     protected $className;
 
-    /* @var bool */
-    protected $singleton = true;
-
-    /* @var MethodDefinition[] */
-    protected $methods = [];
-
-    /* @var object */
-    protected $instance = null;
+    /* @var InstanceDefinition[] */
+    protected $instances = [];
 
     /**
      * @param string $className
@@ -32,83 +26,20 @@ class ClassDefinition
     }
 
     /**
-     * @param bool $singleton
+     * @param string $name
      *
-     * @return ClassDefinition
+     * @return InstanceDefinition
      */
-    public function singleton($singleton = true)
+    public function getInstance($name = 'default')
     {
-        $this->singleton = (bool) $singleton;
-        return $this;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSingleton()
-    {
-        return $this->singleton;
-    }
-
-    /**
-     * @param string $methodName
-     *
-     * @return MethodDefinition
-     */
-    public function getMethod($methodName)
-    {
-        if (isset($this->methods[$methodName])) {
-            return $this->methods[$methodName];
+        if (isset($this->instances[$name])) {
+            return $this->instances[$name];
         }
 
-        $method = new MethodDefinition($methodName);
-        $this->methods[$methodName] = $method;
+        $instance = new InstanceDefinition($this, $name);
+        $this->instances[$name] = $instance;
 
-        return $method;
+        return $instance;
     }
 
-    /**
-     * @return MethodDefinition[]
-     */
-    public function getMethods()
-    {
-        return $this->methods;
-    }
-
-    /**
-     * @return MethodDefinition
-     */
-    public function getConstructor()
-    {
-        return $this->getMethod('__construct');
-    }
-
-    /**
-     * @param object $instance
-     *
-     * @return ClassDefinition
-     */
-    public function setInstance($instance)
-    {
-        $this->instance = $instance;
-        $this->singleton();
-
-        return $this;
-    }
-
-    /**
-     * @return object|null
-     */
-    public function getInstance()
-    {
-        return $this->instance;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasInstance()
-    {
-        return ($this->instance !== null);
-    }
 }

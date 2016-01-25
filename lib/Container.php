@@ -28,9 +28,9 @@ interface Container {
     /**
      * @param string $className
      *
-     * @return ClassDefinition
+     * @return InstanceDefinition
      */
-    public function getClass($className);
+    public function getInstanceDef($className);
 
     /**
      * @param string $className

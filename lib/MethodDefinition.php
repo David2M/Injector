@@ -3,6 +3,10 @@ namespace David2M\Injector;
 
 class MethodDefinition
 {
+
+    /* @var InstanceDefinition */
+    protected $instanceDef;
+
     /* @var string */
     protected $methodName;
 
@@ -12,12 +16,18 @@ class MethodDefinition
     /* @var array[string]mixed */
     protected $calls = [];
 
-    /**
-     * @param string $methodName
-     */
-    public function __construct($methodName)
+    public function __construct(InstanceDefinition $instanceDef, $methodName)
     {
+        $this->instanceDef = $instanceDef;
         $this->methodName = $methodName;
+    }
+
+    /**
+     * @return string
+     */
+    public function getClassName()
+    {
+        return $this->instanceDef->getClassName();
     }
 
     /**

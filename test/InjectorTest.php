@@ -1,6 +1,7 @@
 <?php
 use David2M\Injector\Injector;
 use David2M\Injector\ClassDefinition;
+use David2M\Injector\InstanceDefinition;
 
 require('fixtures.php');
 
@@ -24,15 +25,17 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->assertSame($className, $this->injector->resolveAlias($alias));
     }
 
-    public function testGetClassDefinitionUsingAlias()
+    public function testGetInstanceDefinitionUsingAlias()
     {
         $alias = 'P';
         $className = 'Product';
 
         $this->injector->setAlias($alias, $className);
-        $classDef = $this->injector->getClass($alias);
+        $instanceDef = $this->injector->getInstanceDef($alias);
 
-        $this->assertEquals(new ClassDefinition($className), $classDef);
+        $expected = new ClassDefinition($className);
+
+        $this->assertEquals($expected->getInstance(), $instanceDef);
     }
 
     public function testMakeObjectUsingAlias()
@@ -47,12 +50,12 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf($className, $obj);
     }
 
-    public function testInvokingGetClassMoreThanOnceWithSameClassNameReturnsSameInstance()
+    public function testInvokingGetInstanceDefMoreThanOnceWithSameClassNameReturnsSameInstance()
     {
         $class = 'My\Class';
 
-        $obj1 = $this->injector->getClass($class);
-        $obj2 = $this->injector->getClass($class);
+        $obj1 = $this->injector->getInstanceDef($class);
+        $obj2 = $this->injector->getInstanceDef($class);
 
         $this->assertTrue($obj1 === $obj2);
     }
@@ -128,6 +131,39 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeSame($value, 'param', $obj);
     }
 
+    public function testStringParamSetForObjectParamGetsResolvedToAnObject()
+    {
+        $className = 'UserMapper';
+        $this->injector
+            ->getConstructor($className)
+            ->setParam('adapter', 'PdoAdapter');
+
+        $obj = $this->injector->make($className);
+
+        $this->assertInstanceOf($className, $obj);
+    }
+
+    public function testd()
+    {
+        $className = 'User';
+        $classAndInstanceNameOne = $className . '#david';
+        $classAndInstanceNameTwo = $className . '#bob';
+
+        $this->injector
+            ->getConstructor($classAndInstanceNameOne)
+            ->setParam('name', 'David');
+
+        $this->injector
+            ->getConstructor($classAndInstanceNameTwo)
+            ->setParam('name', 'Bob');
+
+        $david = $this->injector->make($classAndInstanceNameOne);
+        $bob = $this->injector->make($classAndInstanceNameTwo);
+
+        $this->assertFalse($david === $bob);
+        $this->assertFalse($david->getName() === $bob->getName());
+    }
+
     public function testObjectsAreTheSameInstance()
     {
         $obj1 = $this->injector->make('User');
@@ -136,10 +172,10 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($obj1 === $obj2);
     }
 
-    public function testObjectsAreTheSameInstanceWhenClassIsExplicitlyDefinedAsSingleton()
+    public function testObjectsAreTheSameInstanceWhenInstanceIsExplicitlyDefinedAsSingleton()
     {
         $this->injector
-            ->getClass('User')
+            ->getInstanceDef('User')
             ->singleton(true);
 
         $obj1 = $this->injector->make('User');
@@ -148,10 +184,10 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($obj1 === $obj2);
     }
 
-    public function testObjectsAreNotTheSameInstanceWhenClassIsDefinedAsNotASingleton()
+    public function testObjectsAreNotTheSameInstanceWhenInstanceIsDefinedAsNotASingleton()
     {
         $this->injector
-            ->getClass('User')
+            ->getInstanceDef('User')
             ->singleton(false);
 
         $obj1 = $this->injector->make('User');
