@@ -162,9 +162,6 @@ class Injector implements Container
             }
         }
 
-        $i = array_search($className, $this->currentlyMaking);
-        array_splice($this->currentlyMaking, $i, 1);
-
         return $object;
     }
 
@@ -264,7 +261,6 @@ class Injector implements Container
     private function createObject(InstanceDefinition $instanceDef, array $params)
     {
         $className = $instanceDef->getClassName();
-        $this->currentlyMaking[] = $className;
         try {
             $reflectionClass = new \ReflectionClass($className);
         }
@@ -277,8 +273,12 @@ class Injector implements Container
             return $reflectionClass->newInstanceWithoutConstructor();
         }
 
+        $this->currentlyMaking[] = $className;
         $methodDef = $instanceDef->getMethod('__construct');
         $parameters = $this->getParameters($constructor->getParameters(), $params, $methodDef);
+
+        $i = array_search($className, $this->currentlyMaking);
+        array_splice($this->currentlyMaking, $i, 1);
 
         return $reflectionClass->newInstanceArgs($parameters);
     }
