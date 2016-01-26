@@ -424,4 +424,10 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->injector->make($className . '#' . $instanceName);
     }
 
+    public function testMakingAnObjectWithACircularDependencyThrowsAnException()
+    {
+        $this->setExpectedException('David2M\Injector\InjectorException', sprintf(Injector::EX_CIRCULAR_DEPENDENCY, 'CircularDependencyOne -> CircularDependencyTwo -> CircularDependencyThree -> CircularDependencyOne'));
+        $this->injector->make('CircularDependencyOne');
+    }
+
 }
