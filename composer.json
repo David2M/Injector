@@ -1,14 +1,18 @@
 {
   "name": "david2m/injector",
   "description": "PHP dependency injector.",
-  "minimum-stability": "stable",
+  "keywords": ["dependency injection", "dic", "ioc", "injector"],
   "license": "MIT",
   "authors": [
     {
-      "name": "David2M",
-      "email": "david2m@hotmail.co.uk"
+      "name": "David Twomey",
+      "email": "david2m@hotmail.co.uk",
+      "role": "Lead Developer"
     }
   ],
+  "require": {
+    "php": ">=5.4.0"
+  },
   "autoload": {
     "psr-4": {
       "David2M\\Injector\\": "lib/"
