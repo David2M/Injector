@@ -102,6 +102,11 @@ namespace
         {
 
         }
+
+        public function build($instanceName)
+        {
+
+        }
     }
 
     function add($a, $b)

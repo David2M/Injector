@@ -131,7 +131,7 @@ class Injector implements Container
         // If a factory exists for the specified class name then delegate the creation of the object to the factory.
         $className = $instanceDef->getClassName();
         if (($factory = $this->getFactory($className)) !== null) {
-            $object = $this->invoke($factory, ['className' => $className]);
+            $object = $this->invoke($factory, ['className' => $className, 'instanceName' => $instanceDef->getName()]);
         }
         else {
             $object = $this->createObject($instanceDef, $params);

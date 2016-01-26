@@ -408,4 +408,20 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->injector->make($className);
     }
 
+    public function testIfFactoryGetsPassedTheInstanceNameOfTheClassIfItHasAParamCalledInstanceName()
+    {
+        $className = 'Service\AuthService';
+        $instanceName = '3rd-party';
+
+        $mockServiceFactory = $this->getMockBuilder('ServiceFactory')->getMock();
+        $mockServiceFactory
+            ->expects($this->once())
+            ->method('build')
+            ->with($instanceName);
+
+        $this->injector->setFactory('Service$', [$mockServiceFactory, 'build']);
+
+        $this->injector->make($className . '#' . $instanceName);
+    }
+
 }
