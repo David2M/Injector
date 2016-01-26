@@ -114,6 +114,27 @@ namespace
         return $a + $b;
     }
 
+    class CircularDependencyOne
+    {
+        public function __construct(CircularDependencyTwo $dependency)
+        {
+        }
+    }
+
+    class CircularDependencyTwo
+    {
+        public function __construct(CircularDependencyThree $dependency)
+        {
+        }
+    }
+
+    class CircularDependencyThree
+    {
+        public function __construct(CircularDependencyOne $dependency)
+        {
+        }
+    }
+
 }
 
 namespace Service

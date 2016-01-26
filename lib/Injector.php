@@ -8,6 +8,7 @@ class Injector implements Container
     const EX_PARAM_NOT_FOUND = 'No parameter found for %s::%s()::$%s.';
     const EX_UNMAPPED_INTERFACE = 'The interface %s is not mapped to a concrete implementation.';
     const EX_METHOD_NOT_CALLABLE = 'The method %s::%s() is not callable.';
+    const EX_CIRCULAR_DEPENDENCY = 'A circular dependency has been found: %s';
 
     /* @var string[] */
     protected $aliases = [];
@@ -24,6 +25,13 @@ class Injector implements Container
 
     /* @var callable[] */
     protected $factories = [];
+
+    /**
+     * Class names of the objects currently being made.
+     *
+     * @var string[]
+     */
+    protected $currentlyMaking = [];
 
     public function setAlias($alias, $className)
     {
@@ -134,6 +142,10 @@ class Injector implements Container
             $object = $this->invoke($factory, ['className' => $className, 'instanceName' => $instanceDef->getName()]);
         }
         else {
+            if (in_array($className, $this->currentlyMaking)) {
+                throw new InjectorException(sprintf(self::EX_CIRCULAR_DEPENDENCY, implode(' -> ', $this->currentlyMaking) . ' -> ' . $className));
+            }
+
             $object = $this->createObject($instanceDef, $params);
         }
 
@@ -149,6 +161,9 @@ class Injector implements Container
                 $this->invoke([$object, $methodName], $params);
             }
         }
+
+        $i = array_search($className, $this->currentlyMaking);
+        array_splice($this->currentlyMaking, $i, 1);
 
         return $object;
     }
@@ -246,9 +261,10 @@ class Injector implements Container
      *
      * @throws InjectorException
      */
-    private function createObject($instanceDef, array $params)
+    private function createObject(InstanceDefinition $instanceDef, array $params)
     {
         $className = $instanceDef->getClassName();
+        $this->currentlyMaking[] = $className;
         try {
             $reflectionClass = new \ReflectionClass($className);
         }
