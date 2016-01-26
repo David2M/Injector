@@ -149,6 +149,18 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $classAndInstanceNameOne = $className . '#david';
         $classAndInstanceNameTwo = $className . '#bob';
 
+        $david = $this->injector->make($classAndInstanceNameOne);
+        $bob = $this->injector->make($classAndInstanceNameTwo);
+
+        $this->assertFalse($david === $bob);
+    }
+
+    public function testMakeTwoDifferentInstancesOfTheSameClassWithDifferentParamsSetOnTheConstructor()
+    {
+        $className = 'User';
+        $classAndInstanceNameOne = $className . '#david';
+        $classAndInstanceNameTwo = $className . '#bob';
+
         $this->injector
             ->getConstructor($classAndInstanceNameOne)
             ->setParam('name', 'David');
@@ -160,7 +172,6 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $david = $this->injector->make($classAndInstanceNameOne);
         $bob = $this->injector->make($classAndInstanceNameTwo);
 
-        $this->assertFalse($david === $bob);
         $this->assertFalse($david->getName() === $bob->getName());
     }
 
