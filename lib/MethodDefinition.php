@@ -1,5 +1,5 @@
 <?php
-namespace David2M\Injector;
+namespace David2M\Syringe;
 
 class MethodDefinition
 {

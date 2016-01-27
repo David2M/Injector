@@ -1,5 +1,5 @@
 {
-  "name": "david2m/injector",
+  "name": "david2m/syringe",
   "description": "PHP dependency injector.",
   "keywords": ["dependency injection", "dic", "ioc", "injector"],
   "license": "MIT",
@@ -18,7 +18,7 @@
   },
   "autoload": {
     "psr-4": {
-      "David2M\\Injector\\": "lib/"
+      "David2M\\Syringe\\": "lib/"
     }
   }
 }

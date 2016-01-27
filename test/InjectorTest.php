@@ -1,7 +1,6 @@
 <?php
-use David2M\Injector\Injector;
-use David2M\Injector\ClassDefinition;
-use David2M\Injector\InstanceDefinition;
+use David2M\Syringe\Injector;
+use David2M\Syringe\ClassDefinition;
 
 require('fixtures.php');
 
@@ -18,7 +17,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
     public function testResolveAliasToClassName()
     {
         $alias = 'Injector';
-        $className = 'David2M\Injector\Injector';
+        $className = 'David2M\Syringe\Injector';
 
         $this->injector->setAlias($alias, $className);
 
@@ -76,7 +75,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $class = 'My\Fake\Class';
         $message = sprintf(Injector::EX_CLASS_NOT_FOUND, $class);
 
-        $this->setExpectedException('David2M\Injector\InjectorException', $message);
+        $this->setExpectedException('David2M\Syringe\InjectorException', $message);
         $this->injector->make($class);
     }
 
@@ -242,7 +241,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
 
     public function testInvokeClosureWithoutSupplyingValueForParam()
     {
-        $this->setExpectedException('David2M\Injector\InjectorException', sprintf(Injector::EX_PARAM_NOT_FOUND, 'InjectorTest', '{closure}', 'param'));
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_PARAM_NOT_FOUND, 'InjectorTest', '{closure}', 'param'));
 
         $this->injector->invoke(function ($param) {
         });
@@ -283,7 +282,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
 
     public function testInterfaceNotMappedToConcreteImplementation()
     {
-        $this->setExpectedException('David2M\Injector\InjectorException', sprintf(Injector::EX_UNMAPPED_INTERFACE, 'DatabaseAdapterInterface'));
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_UNMAPPED_INTERFACE, 'DatabaseAdapterInterface'));
         $this->injector->make('UserMapper');
     }
 
@@ -370,7 +369,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $methodName = 'setName';
         $paramName = 'name';
 
-        $this->setExpectedException('David2M\Injector\InjectorException', sprintf(Injector::EX_PARAM_NOT_FOUND, $className, $methodName, $paramName));
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_PARAM_NOT_FOUND, $className, $methodName, $paramName));
 
         $this->injector
             ->getMethod($className, $methodName)
@@ -384,7 +383,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $className = 'User';
         $methodName = 'setAge';
 
-        $this->setExpectedException('David2M\Injector\InjectorException', sprintf(Injector::EX_METHOD_NOT_CALLABLE, $className, $methodName));
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_METHOD_NOT_CALLABLE, $className, $methodName));
 
         $this->injector
             ->getMethod($className, $methodName)
@@ -426,7 +425,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
 
     public function testMakingAnObjectWithACircularDependencyThrowsAnException()
     {
-        $this->setExpectedException('David2M\Injector\InjectorException', sprintf(Injector::EX_CIRCULAR_DEPENDENCY, 'CircularDependencyOne -> CircularDependencyTwo -> CircularDependencyThree -> CircularDependencyOne'));
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_CIRCULAR_DEPENDENCY, 'CircularDependencyOne -> CircularDependencyTwo -> CircularDependencyThree -> CircularDependencyOne'));
         $this->injector->make('CircularDependencyOne');
     }
 
