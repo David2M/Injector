@@ -142,10 +142,6 @@ class Injector implements Container
             $object = $this->invoke($factory, ['className' => $className, 'instanceName' => $instanceDef->getName()]);
         }
         else {
-            if (in_array($className, $this->currentlyMaking)) {
-                throw new InjectorException(sprintf(self::EX_CIRCULAR_DEPENDENCY, implode(' -> ', $this->currentlyMaking) . ' -> ' . $className));
-            }
-
             $object = $this->createObject($instanceDef, $params);
         }
 
@@ -261,6 +257,11 @@ class Injector implements Container
     private function createObject(InstanceDefinition $instanceDef, array $params)
     {
         $className = $instanceDef->getClassName();
+
+        if (in_array($className, $this->currentlyMaking)) {
+            throw new InjectorException(sprintf(self::EX_CIRCULAR_DEPENDENCY, implode(' -> ', $this->currentlyMaking) . ' -> ' . $className));
+        }
+
         try {
             $reflectionClass = new \ReflectionClass($className);
         }
