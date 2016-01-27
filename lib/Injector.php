@@ -277,8 +277,7 @@ class Injector implements Container
         $methodDef = $instanceDef->getMethod('__construct');
         $parameters = $this->getParameters($constructor->getParameters(), $params, $methodDef);
 
-        $i = array_search($className, $this->currentlyMaking);
-        array_splice($this->currentlyMaking, $i, 1);
+        array_pop($this->currentlyMaking);
 
         return $reflectionClass->newInstanceArgs($parameters);
     }
