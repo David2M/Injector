@@ -1,4 +1,23 @@
 # PHP Dependency Injector #
+A dependency injection container capable of:
+
+1. Auto-wiring.
+2. Delegating object creation to factories.
+3. Dealing with multiple instances of the same class.
+4. Calling methods after instantiation.
+5. Mapping interfaces to concrete implementations.
+6. And more.
+
+## Table of Contents ##
+##### [Instantiating an Object](#instantiating-an-object) #####
+##### [Unresolvable Parameters](#unresolvable-parameters) #####
+##### [Setting Parameters](#setting-parameters) #####
+##### [Mapping to Concrete Implementations](#mapping-to-concrete-implementations) #####
+##### [Calling a Method After Instantiation](#calling-a-method-after-instantiation) #####
+##### [Using Factories (Delegating Instantiation)](#using-factories-delegating-instantiation) #####
+##### [Multiple Instances of the Same Class](#multiple-instances-of-the-same-class) #####
+##### [Sharing Instances](#sharing-instances) #####
+##### [Invoking a Method or Function](#invoking-a-method-or-function) #####
 
 ## Instantiating an Object ##
 
@@ -14,7 +33,7 @@ class UserMapper
 $mapper = $injector->make('UserMapper');
 ```
 
-## Recursively Resolving Parameters ##
+### Recursively Resolving Parameters ###
 ```php
 class PdoAdapter
 {
@@ -86,7 +105,7 @@ Parameters set on the fly always take precedence over parameters set prior to ca
 
 This is useful when [adding calls](#calling-a-method-after-instantiation) to a method or using the [invoke()](#invoking-a-method-or-function) method.
 
-#### Callable Parameters ####
+### Callable Parameters ###
 
 Callable parameters get invoked and their return value gets passed into the method.
 
@@ -101,7 +120,7 @@ $injector
 
 **If the type hint of the parameter is callable and the set parameter is callable then the parameter will NOT be invoked before passing it into the method.**
 
-#### String Parameter Resolved to an Object ####
+### String Parameter Resolved to an Object ###
 You can set a class name for a parameter which has a class or interface type hint.
 
 ```php
