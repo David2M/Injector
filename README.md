@@ -15,8 +15,6 @@ $mapper = $injector->make('UserMapper');
 ```
 
 ## Recursively Resolving Parameters ##
-By using the typehint of a parameter, the injector can recursively resolve and inject an objects dependencies (so long as the typehint is of a concrete implementation).
-
 ```php
 class PdoAdapter
 {
@@ -35,14 +33,24 @@ public function __construct(PdoAdapter $pdoAdapter)
 ```php
 $mapper = $this->make('UserMapper');
 ```
+When making a `UserMapper` the injector discovers that it depends on a `PdoAdapter` so it creates a `PdoAdapter` object first and injects it into the `UserMapper`.
 
 ## Unresolvable Parameters ##
 Two scenarios exist where it is impossible to automatically resolve a parameter:
 
-1. No typehint exists - In this situation you must explicitly tell the injector what the parameter is. See [setting parameters](#setting-parameters).
+1. No type hint exists - In this situation you must explicitly tell the injector what the parameter is. See [setting parameters](#setting-parameters).
 2. The type hint is an interface - See [mapping to concrete implementations](#mapping-to-concrete-implementations).
 
 ### Setting Parameters ###
+
+```php
+class PdoAdapter
+{
+  public function __construct($host, $user, $password, $schema)
+  {
+  }
+}
+```
 
 ```php
 $constructor = $injector->getConstructor('PdoAdapter');
@@ -65,6 +73,17 @@ $injector
   ->setParam('name', 'value');
 ```
 
+You can also set parameters on the fly:
+
+```php
+$injector->make('PdoAdapter', [
+  'host' => 'localhost',
+  'user' => 'david'
+]);
+```
+
+Parameters set on the fly always take precedence over parameters set prior to calling `make()`.
+
 This is useful when [adding calls](#calling-a-method-after-instantiation) to a method or using the [invoke()](#invoking-a-method-or-function) method.
 
 #### Callable Parameters ####
@@ -80,9 +99,78 @@ $injector
   });
 ```
 
-**If the typehint of the parameter is callable and the set parameter is callable then the parameter will NOT be invoked before passing it into the method.**
+**If the type hint of the parameter is callable and the set parameter is callable then the parameter will NOT be invoked before passing it into the method.**
 
-#### String Parameter for a Class Parameter ####
+#### String Parameter Resolved to an Object ####
+You can set a class name for a parameter which has a class or interface type hint.
+
+```php
+class UserMapper
+{
+  public function __construct(PdoAdapter $pdoAdapter)
+  {
+  }
+}
+```
+
+```php
+$injector
+  ->getConstructor('UserMapper')
+  ->setParam('pdoAdapter', 'PdoAdapter');
+```
+
+When the injector is resolving the parameter it will notice it is a string but the type hint is a class. It will then resolve the string parameter (class name) into an object.
+
+This technique is especially powerful when you need to use [multiple instances of the same class](#multiple-instances-of-the-same-class). Say you have two databases, a local and a remote one and both obviously have different connection details. The `UserMapper` connects to the local database and the `Logger` connects to a remote database.
+
+```php
+class UserMapper
+{
+  public function __construct(PdoAdapter $pdoAdapter)
+  {
+  }
+}
+```
+
+```php
+class Logger
+{
+  public function __construct(PdoAdapter $pdoAdapter)
+  {
+  }
+}
+```
+
+Both objects need a different instance of a `PdoAdapter`, one which can connect to the local database and another which can connect to the remote database.
+
+```php
+$injector
+  ->getConstructor('PdoAdapter')
+  ->addParams([
+      'host' => 'localhost',
+      'user' => 'local_user',
+      'password' => 'local_password',
+      'schema' => 'local_database_name'
+    ]);
+
+$injector
+  ->getConstructor('PdoAdapter#remote')
+  ->addParams([
+      'host' => '103.243.0.78',
+      'user' => 'remote_user',
+      'password' => 'remote_password',
+      'schema' => 'remote_database_name'
+    ]);
+
+$injector
+  ->getConstructor('Logger')
+  ->setParam('pdoAdapter', 'PdoAdapter#remote');
+
+$mapper = $injector->make('UserMapper');
+$logger = $injector->make('Logger');
+```
+
+The `UserMapper` will get the `#default` instance of the `PdoAdapter` and the `Logger` will get the `#remote` instance of the `PdoAdapter`. For more information about dealing with multiple instances click [here](#multiple-instances-of-the-same-class).
 
 ### Mapping to Concrete Implementations ###
 
@@ -222,6 +310,28 @@ $localPdoAdapter = $injector->make('PdoAdapter');
 $remotePdoAdapter = $injector->make('PdoAdapter#remote');
 
 var_dump($localPdoAdapter === $remotePdoAdapter); // bool(false)
+```
+
+## Sharing Instances ##
+By default, if an object is created by the injector it is stored and used every time an instance of that object is needed.
+```php
+$userOne = $injector->make('Entity\User');
+$userTwo = $injector->make('Entity\User');
+
+var_dump($userOne === $userTwo); // bool(true)
+```
+
+You can tell the injector to always create an new instance of an object:
+
+```php
+$injector
+  ->getInstanceDef('Entity\User')
+  ->singleton(false);
+
+$userOne = $injector->make('Entity\User');
+$userTwo = $injector->make('Entity\User');
+
+var_dump($userOne === $userTwo); // bool(false)
 ```
 
 ## Invoking a Method or Function ##
