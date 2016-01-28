@@ -9,15 +9,15 @@ A dependency injection container capable of:
 6. And more.
 
 ## Table of Contents ##
-##### [Instantiating an Object](#instantiating-an-object) #####
-##### [Unresolvable Parameters](#unresolvable-parameters) #####
-##### [Setting Parameters](#setting-parameters) #####
-##### [Mapping to Concrete Implementations](#mapping-to-concrete-implementations) #####
-##### [Calling a Method After Instantiation](#calling-a-method-after-instantiation) #####
-##### [Using Factories (Delegating Instantiation)](#using-factories-delegating-instantiation) #####
-##### [Multiple Instances of the Same Class](#multiple-instances-of-the-same-class) #####
-##### [Sharing Instances](#sharing-instances) #####
-##### [Invoking a Method or Function](#invoking-a-method-or-function) #####
+##### [- Instantiating an Object](#instantiating-an-object) #####
+##### [- Unresolvable Parameters](#unresolvable-parameters) #####
+##### [- Setting Parameters](#setting-parameters) #####
+##### [- Mapping to Concrete Implementations](#mapping-to-concrete-implementations) #####
+##### [- Calling a Method After Instantiation](#calling-a-method-after-instantiation) #####
+##### [- Using Factories (Delegating Instantiation)](#using-factories-delegating-instantiation) #####
+##### [- Multiple Instances of the Same Class](#multiple-instances-of-the-same-class) #####
+##### [- Sharing Instances](#sharing-instances) #####
+##### [- Invoking a Method or Function](#invoking-a-method-or-function) #####
 
 ## Instantiating an Object ##
 
