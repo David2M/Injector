@@ -324,9 +324,7 @@ var_dump($userOne === $userTwo); // bool(true)
 You can tell the injector to always create an new instance of an object:
 
 ```php
-$injector
-  ->getInstanceDef('Entity\User')
-  ->singleton(false);
+$injector->singleton('Entity\User', false);
 
 $userOne = $injector->make('Entity\User');
 $userTwo = $injector->make('Entity\User');

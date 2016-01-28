@@ -184,9 +184,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
 
     public function testObjectsAreTheSameInstanceWhenInstanceIsExplicitlyDefinedAsSingleton()
     {
-        $this->injector
-            ->getInstanceDef('User')
-            ->singleton(true);
+        $this->injector->singleton('User', true);
 
         $obj1 = $this->injector->make('User');
         $obj2 = $this->injector->make('User');
@@ -196,9 +194,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
 
     public function testObjectsAreNotTheSameInstanceWhenInstanceIsDefinedAsNotASingleton()
     {
-        $this->injector
-            ->getInstanceDef('User')
-            ->singleton(false);
+        $this->injector->singleton('User', false);
 
         $obj1 = $this->injector->make('User');
         $obj2 = $this->injector->make('User');

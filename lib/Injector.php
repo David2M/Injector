@@ -117,6 +117,12 @@ class Injector implements Container
         return $this;
     }
 
+    public function singleton($className, $singleton = true)
+    {
+        $this->getInstanceDef($className)->singleton($singleton);
+        return $this;
+    }
+
     /**
      * @param string $className
      * @param array[string]mixed

@@ -84,4 +84,12 @@ interface Container {
      */
     public function share(array $objects);
 
+    /**
+     * @param string $className
+     * @param bool $singleton
+     *
+     * @return Container
+     */
+    public function singleton($className, $singleton = true);
+
 }
