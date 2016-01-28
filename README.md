@@ -172,7 +172,7 @@ $logger = $injector->make('Logger');
 
 The `UserMapper` will get the `#default` instance of the `PdoAdapter` and the `Logger` will get the `#remote` instance of the `PdoAdapter`. For more information about dealing with multiple instances click [here](#multiple-instances-of-the-same-class).
 
-### Mapping to Concrete Implementations ###
+## Mapping to Concrete Implementations ##
 
 ```php
 interface DatabaseAdapterInterface
