@@ -9,6 +9,8 @@ A dependency injection container capable of:
 6. And more.
 
 ## Table of Contents ##
+##### [- Requirements](#requirements) #####
+##### [- Installation](#installation) #####
 ##### [- Instantiating an Object](#instantiating-an-object) #####
 ##### [- Unresolvable Parameters](#unresolvable-parameters) #####
 ##### [- Setting Parameters](#setting-parameters) #####
@@ -18,6 +20,18 @@ A dependency injection container capable of:
 ##### [- Multiple Instances of the Same Class](#multiple-instances-of-the-same-class) #####
 ##### [- Sharing Instances](#sharing-instances) #####
 ##### [- Invoking a Method or Function](#invoking-a-method-or-function) #####
+
+## Requirements ##
+
+Syringe requires PHP 5.4 or higher.
+
+## Installation ##
+
+#### Composer ####
+
+```
+composer require david2m/syringe
+````
 
 ## Instantiating an Object ##
 
