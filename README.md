@@ -41,7 +41,7 @@ Two scenarios exist where it is impossible to automatically resolve a parameter:
 1. No type hint exists - In this situation you must explicitly tell the injector what the parameter is. See [setting parameters](#setting-parameters).
 2. The type hint is an interface - See [mapping to concrete implementations](#mapping-to-concrete-implementations).
 
-### Setting Parameters ###
+## Setting Parameters ##
 
 ```php
 class PdoAdapter
