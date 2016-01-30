@@ -311,14 +311,14 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($user === $obj);
     }
 
-    public function testShareAnObjectWhileMappingAnInterfaceToTheObject()
+    public function testShareAnObjectWhileSettingTheInstanceName()
     {
         $adapter = new PdoAdapter();
-        $this->injector->share(['DatabaseAdapterInterface' => $adapter]);
+        $this->injector->share(['remote' => $adapter]);
 
-        $obj = $this->injector->make('UserMapper');
+        $obj = $this->injector->make('PdoAdapter#remote');
 
-        $this->assertAttributeInstanceOf('PdoAdapter', 'adapter', $obj);
+        $this->assertTrue($adapter === $obj);
     }
 
     public function testMethodGetsCalledOnceAfterMakingObject()

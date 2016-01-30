@@ -107,11 +107,10 @@ class Injector implements Container
     {
         foreach ($objects as $key => $object) {
             $className = get_class($object);
-            $this->getInstanceDef($className)->setInstance($object);
-
             if (is_string($key)) {
-                $this->setMapping($key, $className);
+                $className .= '#' . $key;
             }
+            $this->getInstanceDef($className)->setInstance($object);
         }
 
         return $this;
