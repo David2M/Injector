@@ -7,6 +7,7 @@ class Injector implements Container
     const EX_CLASS_NOT_FOUND = 'The class %s cannot be found.';
     const EX_PARAM_NOT_FOUND = 'No parameter found for %s::%s()::$%s.';
     const EX_UNMAPPED_INTERFACE = 'The interface %s is not mapped to a concrete implementation.';
+    const EX_UNMAPPED_ABSTRACT_CLASS = 'The abstract class %s is not mapped to a concrete implementation.';
     const EX_METHOD_NOT_CALLABLE = 'The method %s::%s() is not callable.';
     const EX_CIRCULAR_DEPENDENCY = 'A circular dependency has been found: %s';
 
@@ -17,7 +18,7 @@ class Injector implements Container
     protected $classDefs = [];
 
     /**
-     * Mappings of interfaces to concrete classes.
+     * Mappings of interfaces and abstract classes to concrete implementations.
      *
      * @var string[]
      */
@@ -335,10 +336,16 @@ class Injector implements Container
         if (($reflectionClass = $reflectionParam->getClass()) !== null) {
             try {
                 $className = $reflectionClass->getName();
-                if ($reflectionClass->isInterface()) {
-                    $className = $this->resolveInterface($className);
-                    if ($className === null) {
+                if ($reflectionClass->isInterface() || $reflectionClass->isAbstract()) {
+                    $className = (isset($this->mappings[$className])) ? $this->mappings[$className] : null;
+                    if ($className !== null) {
+                        return $this->make($className);
+                    }
+                    if ($reflectionClass->isInterface()) {
                         throw new InjectorException(sprintf(self::EX_UNMAPPED_INTERFACE, $reflectionClass->getName()));
+                    }
+                    if ($reflectionClass->isAbstract()) {
+                        throw new InjectorException(sprintf(self::EX_UNMAPPED_ABSTRACT_CLASS, $reflectionClass->getName()));
                     }
                 }
 

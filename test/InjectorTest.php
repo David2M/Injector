@@ -282,6 +282,12 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->injector->make('UserMapper');
     }
 
+    public function testAbstractClassNotMappedToConcreteImplementation()
+    {
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_UNMAPPED_ABSTRACT_CLASS, 'Animal'));
+        $this->injector->make('A');
+    }
+
     public function testMapInterfaceToConcreteImplementation()
     {
         $this->injector->setMapping('DatabaseAdapterInterface', 'PdoAdapter');

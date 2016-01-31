@@ -135,6 +135,22 @@ namespace
         }
     }
 
+    abstract class Animal
+    {
+
+    }
+
+    class Dog extends Animal
+    {
+
+    }
+
+    class A {
+        public function __construct(Animal $animal)
+        {
+        }
+    }
+
 }
 
 namespace Service
