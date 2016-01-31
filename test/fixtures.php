@@ -146,8 +146,10 @@ namespace
     }
 
     class A {
+        private $animal;
         public function __construct(Animal $animal)
         {
+            $this->animal = $animal;
         }
     }
 

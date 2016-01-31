@@ -296,6 +296,14 @@ class InjectorTest extends PHPUnit_Framework_TestCase
         $this->assertAttributeInstanceOf('PdoAdapter', 'adapter', $mapper);
     }
 
+    public function testMapAbstractClassToConcreteImplementation()
+    {
+        $this->injector->setMapping('Animal', 'Dog');
+        $a = $this->injector->make('A');
+
+        $this->assertAttributeInstanceOf('Dog', 'animal', $a);
+    }
+
     public function testIfClosureParamIsCalledBeforePassingItIntoTheConstructor()
     {
         $this->injector
