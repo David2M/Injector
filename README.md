@@ -259,6 +259,8 @@ Once the `PdoAdapter` has been instantiated the `connect()` method will be calle
 ## Using Factories (Delegating Instantiation) ##
 A factory constist of a regular expression and a callable. The regular expression is matched against the name of the class being made, if there is a match then the instantiation of the object is delegated to the factory.
 
+**If the class name you're trying to match contains blackslashes you do not need to escape them, this is done automatically by the injector.**
+
 ```php
 // The regular expression ^PdoAdapter$ will match the classname PdoAdapter
 $injector->setFactory('^PdoAdapter$', function()
@@ -363,6 +365,19 @@ $userOne = $injector->make('Entity\User');
 $userTwo = $injector->make('Entity\User');
 
 var_dump($userOne === $userTwo); // bool(false)
+```
+
+Sharing an object:
+```php
+$injector->share([$pdoAdapter]);
+```
+
+Sharing an object and specifying the instance name:
+```php
+$injector->share(['remote' => $remotePdoAdapter]);
+
+// To retrieve the $remotePdoAdapter
+$remotePdoAdapter = $injector->make('PdoAdapter#remote');
 ```
 
 ## Invoking a Method or Function ##
