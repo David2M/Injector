@@ -377,16 +377,4 @@ class Injector implements Container
         return (is_callable($param) && !$reflectionParam->isCallable()) ? $this->invoke($param) : $param;
     }
 
-    /**
-     * Resolve an interface to a class name.
-     *
-     * @param string $interface
-     *
-     * @return string|null
-     */
-    private function resolveInterface($interface)
-    {
-        return (isset($this->mappings[$interface])) ? $this->mappings[$interface] : null;
-    }
-
 }
