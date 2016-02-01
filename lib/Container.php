@@ -4,28 +4,6 @@ namespace David2M\Syringe;
 interface Container {
 
     /**
-     * @param string $alias
-     * @param string $className
-     *
-     * @return Container
-     */
-    public function setAlias($alias, $className);
-
-    /**
-     * @param array $aliases
-     *
-     * @return Container
-     */
-    public function addAliases(array $aliases);
-
-    /**
-     * @param string $alias
-     *
-     * @return string|null
-     */
-    public function resolveAlias($alias);
-
-    /**
      * @param string $className
      *
      * @return InstanceDefinition

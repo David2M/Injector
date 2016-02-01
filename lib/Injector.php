@@ -11,9 +11,6 @@ class Injector implements Container
     const EX_METHOD_NOT_CALLABLE = 'The method %s::%s() is not callable.';
     const EX_CIRCULAR_DEPENDENCY = 'A circular dependency has been found: %s';
 
-    /* @var string[] */
-    protected $aliases = [];
-
     /* @var ClassDefinition[] */
     protected $classDefs = [];
 
@@ -34,27 +31,9 @@ class Injector implements Container
      */
     protected $currentlyMaking = [];
 
-    public function setAlias($alias, $className)
-    {
-        $this->aliases[$alias] = $className;
-        return $this;
-    }
-
-    public function addAliases(array $aliases)
-    {
-        $this->aliases = array_merge($this->aliases, $aliases);
-        return $this;
-    }
-
-    public function resolveAlias($alias)
-    {
-        return (isset($this->aliases[$alias])) ? $this->aliases[$alias] : null;
-    }
-
     public function getInstanceDef($className)
     {
         list($className, $instanceName) = $this->extractClassAndInstanceName($className);
-        $className = (isset($this->aliases[$className])) ? $this->aliases[$className] : $className;
 
         if (isset($this->classDefs[$className])) {
             $classDef = $this->classDefs[$className];

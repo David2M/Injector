@@ -1,6 +1,5 @@
 <?php
 use David2M\Syringe\Injector;
-use David2M\Syringe\ClassDefinition;
 
 require('fixtures.php');
 
@@ -12,41 +11,6 @@ class InjectorTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->injector = new Injector();
-    }
-
-    public function testResolveAliasToClassName()
-    {
-        $alias = 'Injector';
-        $className = 'David2M\Syringe\Injector';
-
-        $this->injector->setAlias($alias, $className);
-
-        $this->assertSame($className, $this->injector->resolveAlias($alias));
-    }
-
-    public function testGetInstanceDefinitionUsingAlias()
-    {
-        $alias = 'P';
-        $className = 'Product';
-
-        $this->injector->setAlias($alias, $className);
-        $instanceDef = $this->injector->getInstanceDef($alias);
-
-        $expected = new ClassDefinition($className);
-
-        $this->assertEquals($expected->getInstance(), $instanceDef);
-    }
-
-    public function testMakeObjectUsingAlias()
-    {
-        $alias = 'P';
-        $className = 'Product';
-
-        $this->injector->setAlias($alias, $className);
-
-        $obj = $this->injector->make('P');
-
-        $this->assertInstanceOf($className, $obj);
     }
 
     public function testInvokingGetInstanceDefMoreThanOnceWithSameClassNameReturnsSameInstance()
