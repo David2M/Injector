@@ -72,8 +72,8 @@ When making a `UserMapper` the injector discovers that it depends on a `PdoAdapt
 ## Unresolvable Parameters ##
 Two scenarios exist where it is impossible to automatically resolve a parameter:
 
-1. No type hint exists - In this situation you must explicitly tell the injector what the parameter is. See [setting parameters](#setting-parameters).
-2. The type hint is an interface - See [mapping to concrete implementations](#mapping-to-concrete-implementations).
+1. No type-hint exists - In this situation you must explicitly tell the injector what the parameter is. See [setting parameters](#setting-parameters).
+2. The type-hint is an interface or abstract class - See [mapping to concrete implementations](#mapping-to-concrete-implementations).
 
 ## Setting Parameters ##
 
@@ -133,10 +133,10 @@ $injector
   });
 ```
 
-**If the type hint of the parameter is callable and the set parameter is callable then the parameter will NOT be invoked before passing it into the method.**
+**If the type-hint of the parameter is callable and the set parameter is callable then the parameter will NOT be invoked before passing it into the method.**
 
 ### String Parameter Resolved to an Object ###
-You can set a class name for a parameter which has a class or interface type hint.
+You can set a class name for a parameter which has a class or interface type-hint.
 
 ```php
 class UserMapper
@@ -153,7 +153,7 @@ $injector
   ->setParam('pdoAdapter', 'PdoAdapter');
 ```
 
-When the injector is resolving the parameter it will notice it is a string but the type hint is a class. It will then resolve the string parameter (class name) into an object.
+When the injector is resolving the parameter it will notice it is a string but the type-hint is a class. It will then resolve the string parameter (class name) into an object.
 
 This technique is especially powerful when you need to use [multiple instances of the same class](#multiple-instances-of-the-same-class). Say you have two databases, a local and a remote one and both obviously have different connection details. The `UserMapper` connects to the local database and the `Logger` connects to a remote database.
 
