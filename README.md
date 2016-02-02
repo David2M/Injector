@@ -5,8 +5,9 @@ A dependency injection container capable of:
 2. Delegating object creation to factories.
 3. Dealing with multiple instances of the same class.
 4. Calling methods after instantiation.
-5. Mapping interfaces to concrete implementations.
-6. And more.
+5. Mapping interfaces and abstract classes to concrete implementations.
+6. Circular dependency detection.
+7. And more.
 
 ## Table of Contents ##
 ##### [- Requirements](#requirements) #####
@@ -228,13 +229,15 @@ public function __construct(DatabaseAdapterInterface $dbAdapter)
 
 When trying to make a `UserMapper` the injector will throw an `InjectorException` because it cannot resolve `DatabaseAdapterInterface` to a concrete implementation. To prevent this you simply map the interface to a concrete implementation i.e. a class which implements the interface.
 
+**You can also map abstract classes to concrete implementations.**
+
 ```php
 $injector->setMapping('DatabaseAdapterInterface', 'PdoAdapter');
 
 // You can also add multiple mappings at once
 $injector->addMappings([
   'DatabaseAdapterInterface' => 'PdoAdapter',
-  'AnotherInterface' => 'AnotherConcreteImplementation'
+  'AbstractClassName' => 'AnotherConcreteImplementation'
 ]);
 ```
 
