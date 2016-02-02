@@ -1,6 +1,6 @@
 {
   "name": "david2m/syringe",
-  "description": "PHP dependency injector.",
+  "description": "A feature-rich PHP dependency injector that just makes sense.",
   "keywords": ["dependency injection", "dic", "ioc", "injector"],
   "license": "MIT",
   "authors": [
