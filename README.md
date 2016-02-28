@@ -65,7 +65,7 @@ public function __construct(PdoAdapter $pdoAdapter)
 ```
 
 ```php
-$mapper = $this->make('UserMapper');
+$mapper = $injector->make('UserMapper');
 ```
 When making a `UserMapper` the injector discovers that it depends on a `PdoAdapter` so it creates a `PdoAdapter` object first and injects it into the `UserMapper`.
 
