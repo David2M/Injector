@@ -13,8 +13,8 @@ A dependency injection container capable of:
 ##### [- Requirements](#requirements) #####
 ##### [- Installation](#installation) #####
 ##### [- Instantiating an Object](#instantiating-an-object) #####
-##### [- Unresolvable Parameters](#unresolvable-parameters) #####
-##### [- Setting Parameters](#setting-parameters) #####
+##### [- Unresolvable Arguments](#unresolvable-arguments) #####
+##### [- Setting Arguments](#setting-arguments) #####
 ##### [- Mapping to Concrete Implementations](#mapping-to-concrete-implementations) #####
 ##### [- Calling a Method After Instantiation](#calling-a-method-after-instantiation) #####
 ##### [- Using Factories (Delegating Instantiation)](#using-factories-delegating-instantiation) #####
@@ -69,13 +69,13 @@ $mapper = $injector->make('UserMapper');
 ```
 When making a `UserMapper` the injector discovers that it depends on a `PdoAdapter` so it creates a `PdoAdapter` object first and injects it into the `UserMapper`.
 
-## Unresolvable Parameters ##
-Two scenarios exist where it is impossible to automatically resolve a parameter:
+## Unresolvable Arguments ##
+Two scenarios exist where it is impossible to automatically resolve an argument:
 
-1. No type-hint exists - In this situation you must explicitly tell the injector what the parameter is. See [setting parameters](#setting-parameters).
+1. No type-hint exists - In this situation you must explicitly tell the injector what the argument is. See [setting arguments](#setting-arguments).
 2. The type-hint is an interface or abstract class - See [mapping to concrete implementations](#mapping-to-concrete-implementations).
 
-## Setting Parameters ##
+## Setting Arguments ##
 
 ```php
 class PdoAdapter
@@ -89,25 +89,25 @@ class PdoAdapter
 ```php
 $constructor = $injector->getConstructor('PdoAdapter');
 
-// Setting one parameter
-$constructor->setParam('host', 'localhost');
+// Setting one argument
+$constructor->setArgument('host', 'localhost');
 
-// Setting multiple parameters
-$constructor->addParams([
+// Setting multiple arguments
+$constructor->addArguments([
   'host' => 'localhost',
   'user' => 'david'
 ]);
 ```
 
-You can set the parameters of any method, not just the constructor.
+You can set the arguments of any method, not just the constructor.
 
 ```php
 $injector
   ->getMethod('PdoAdapter', 'someMethod')
-  ->setParam('name', 'value');
+  ->setArgument('name', 'value');
 ```
 
-You can also set parameters on the fly:
+You can also set arguments on the fly:
 
 ```php
 $injector->make('PdoAdapter', [
@@ -116,27 +116,27 @@ $injector->make('PdoAdapter', [
 ]);
 ```
 
-Parameters set on the fly always take precedence over parameters set prior to calling `make()`.
+Arguments set on the fly always take precedence over arguments set prior to calling `make()`.
 
 This is useful when [adding calls](#calling-a-method-after-instantiation) to a method or using the [invoke()](#invoking-a-method-or-function) method.
 
-### Callable Parameters ###
+### Callable Arguments ###
 
-Callable parameters get invoked and their return value gets passed into the method.
+Callable arguments get invoked and their return value gets passed into the method.
 
 ```php
 $injector
   ->getConstructor('PdoAdapter')
-  ->setParam('user', function()
+  ->setArgument('user', function()
   {
     return 'bob';
   });
 ```
 
-**If the type-hint of the parameter is callable and the set parameter is callable then the parameter will NOT be invoked before passing it into the method.**
+**If the type-hint of the parameter is callable and the set argument is callable then the argument will NOT be invoked before passing it into the method.**
 
-### String Parameter Resolved to an Object ###
-You can set a class name for a parameter which has a class or interface type-hint.
+### String Argument Resolved to an Object ###
+You can set a class name argument for a parameter which has a class or interface type-hint.
 
 ```php
 class UserMapper
@@ -150,10 +150,10 @@ class UserMapper
 ```php
 $injector
   ->getConstructor('UserMapper')
-  ->setParam('pdoAdapter', 'PdoAdapter');
+  ->setArgument('pdoAdapter', 'PdoAdapter');
 ```
 
-When the injector is resolving the parameter it will notice it is a string but the type-hint is a class. It will then resolve the string parameter (class name) into an object.
+When the injector is resolving the argument it will notice it is a string but the type-hint is a class. It will then resolve the string argument (class name) into an object.
 
 This technique is especially powerful when you need to use [multiple instances of the same class](#multiple-instances-of-the-same-class). Say you have two databases, a local and a remote one and both obviously have different connection details. The `UserMapper` connects to the local database and the `Logger` connects to a remote database.
 
@@ -180,7 +180,7 @@ Both objects need a different instance of a `PdoAdapter`, one which can connect 
 ```php
 $injector
   ->getConstructor('PdoAdapter')
-  ->addParams([
+  ->addArguments([
       'host' => 'localhost',
       'user' => 'local_user',
       'password' => 'local_password',
@@ -189,7 +189,7 @@ $injector
 
 $injector
   ->getConstructor('PdoAdapter#remote')
-  ->addParams([
+  ->addArguments([
       'host' => '103.243.0.78',
       'user' => 'remote_user',
       'password' => 'remote_password',
@@ -198,7 +198,7 @@ $injector
 
 $injector
   ->getConstructor('Logger')
-  ->setParam('pdoAdapter', 'PdoAdapter#remote');
+  ->setArgument('pdoAdapter', 'PdoAdapter#remote');
 
 $mapper = $injector->make('UserMapper');
 $logger = $injector->make('Logger');
@@ -257,12 +257,12 @@ $injector
 $pdoAdapter = $injector->make('PdoAdapter');
 ```
 
-Once the `PdoAdapter` has been instantiated the `connect()` method will be called before the object is returned. If the method being called has any parameters they will be resolved and passed into the method. If the method has any [unresolvable parameters](#unresolvable-parameters) you must [set them](#setting-parameters) before you make the object or else pass them to the `addCall()` method.
+Once the `PdoAdapter` has been instantiated the `connect()` method will be called before the object is returned. If the method being called has any parameters they will be resolved and passed into the method. If the method has any [unresolvable arguments](#unresolvable-arguments) you must [set them](#setting-arguments) before you make the object or else pass them to the `addCall()` method.
 
 ## Using Factories (Delegating Instantiation) ##
-A factory constist of a regular expression and a callable. The regular expression is matched against the name of the class being made, if there is a match then the instantiation of the object is delegated to the factory.
+A factory consists of a regular expression and a callable. The regular expression is matched against the name of the class being made, if there is a match then the instantiation of the object is delegated to the factory.
 
-**If the class name you're trying to match contains blackslashes you do not need to escape them, this is done automatically by the injector.**
+**If the class name you're trying to match contains backslashes you do not need to escape them, this is done automatically by the injector.**
 
 ```php
 // The regular expression ^PdoAdapter$ will match the classname PdoAdapter
@@ -328,7 +328,7 @@ Two different instances of the same class:
 ```php
 $injector
   ->getConstructor('PdoAdapter')
-  ->addParams([
+  ->addArguments([
       'host' => 'localhost',
       'user' => 'local_user',
       'password' => 'local_password',
@@ -337,7 +337,7 @@ $injector
 
 $injector
   ->getConstructor('PdoAdapter#remote')
-  ->addParams([
+  ->addArguments([
       'host' => '103.243.0.78',
       'user' => 'remote_user',
       'password' => 'remote_password',
@@ -384,4 +384,4 @@ $remotePdoAdapter = $injector->make('PdoAdapter#remote');
 ```
 
 ## Invoking a Method or Function ##
-The `invoke()` method accepts any valid PHP [callable](https://secure.php.net/manual/en/language.types.callable.php) and an optional second argument which contains parameters you want to pass into the method/function when it is invoked.
+The `invoke()` method accepts any valid PHP [callable](https://secure.php.net/manual/en/language.types.callable.php) and an optional second parameter which contains arguments you want to pass into the method/function when it is invoked.
