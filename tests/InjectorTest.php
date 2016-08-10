@@ -57,20 +57,20 @@ class InjectorTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('EmptyConstructor', $obj);
     }
 
-    public function testSetConstructorParamBeforeMakingObject()
+    public function testSetConstructorArgumentBeforeMakingObject()
     {
         $value = 'Test Value';
 
         $this->injector
             ->getConstructor('ConstructorOneParam')
-            ->setParam('param', $value);
+            ->setArgument('param', $value);
 
         $obj = $this->injector->make('ConstructorOneParam');
 
         $this->assertAttributeSame($value, 'param', $obj);
     }
 
-    public function testSetConstructorParamWhenMakingObject()
+    public function testSetConstructorArgumentWhenMakingObject()
     {
         $value = 'Test Value';
         $obj = $this->injector->make('ConstructorOneParam', ['param' => $value]);
@@ -89,19 +89,19 @@ class InjectorTest extends \PHPUnit_Framework_TestCase
         $value = 'My Value';
         $this->injector
             ->getConstructor('ConstructorOptionalParam')
-            ->setParam('param', $value);
+            ->setArgument('param', $value);
 
         $obj = $this->injector->make('ConstructorOptionalParam');
 
         $this->assertAttributeSame($value, 'param', $obj);
     }
 
-    public function testStringParamSetForObjectParamGetsResolvedToAnObject()
+    public function testStringArgumentSetForObjectParamGetsResolvedToAnObject()
     {
         $className = 'UserMapper';
         $this->injector
             ->getConstructor($className)
-            ->setParam('adapter', 'PdoAdapter');
+            ->setArgument('adapter', 'PdoAdapter');
 
         $obj = $this->injector->make($className);
 
@@ -120,7 +120,7 @@ class InjectorTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($david === $bob);
     }
 
-    public function testMakeTwoDifferentInstancesOfTheSameClassWithDifferentParamsSetOnTheConstructor()
+    public function testMakeTwoDifferentInstancesOfTheSameClassWithDifferentArgumentsSetOnTheConstructor()
     {
         $className = 'User';
         $classAndInstanceNameOne = $className . '#david';
@@ -128,11 +128,11 @@ class InjectorTest extends \PHPUnit_Framework_TestCase
 
         $this->injector
             ->getConstructor($classAndInstanceNameOne)
-            ->setParam('name', 'David');
+            ->setArgument('name', 'David');
 
         $this->injector
             ->getConstructor($classAndInstanceNameTwo)
-            ->setParam('name', 'Bob');
+            ->setArgument('name', 'Bob');
 
         $david = $this->injector->make($classAndInstanceNameOne);
         $bob = $this->injector->make($classAndInstanceNameTwo);
@@ -201,15 +201,15 @@ class InjectorTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(100, $actual);
     }
 
-    public function testInvokeClosureWithoutSupplyingValueForParam()
+    public function testInvokeClosureWithoutSupplyingRequiredArgument()
     {
-        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_PARAM_NOT_FOUND, self::class, 'Tests\David2M\Syringe\{closure}', 'param'));
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_ARGUMENT_NOT_FOUND, self::class, 'Tests\David2M\Syringe\{closure}', 'param'));
 
         $this->injector->invoke(function ($param) {
         });
     }
 
-    public function testInvokeClosureWithParamSuppliedAtInvokeTime()
+    public function testInvokeClosureWithArgumentSuppliedAtInvokeTime()
     {
         $expected = 100;
         $actual = $this->injector->invoke(function ($param) {
@@ -270,11 +270,11 @@ class InjectorTest extends \PHPUnit_Framework_TestCase
         $this->assertAttributeInstanceOf('Dog', 'animal', $a);
     }
 
-    public function testIfClosureParamIsCalledBeforePassingItIntoTheConstructor()
+    public function testIfClosureArgumentIsCalledBeforePassingItIntoTheConstructor()
     {
         $this->injector
             ->getConstructor('User')
-            ->setParam('name', function() {return 'David'; });
+            ->setArgument('name', function() {return 'David'; });
 
         $user = $this->injector->make('User');
 
@@ -339,13 +339,13 @@ class InjectorTest extends \PHPUnit_Framework_TestCase
         $this->assertAttributeSame(0, 'number', $obj);
     }
 
-    public function testAddCallToMethodWithoutSupplyingRequiredParam()
+    public function testAddCallToMethodWithoutSupplyingRequiredArgument()
     {
         $className = 'User';
         $methodName = 'setName';
         $paramName = 'name';
 
-        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_PARAM_NOT_FOUND, $className, $methodName, $paramName));
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_ARGUMENT_NOT_FOUND, $className, $methodName, $paramName));
 
         $this->injector
             ->getMethod($className, $methodName)

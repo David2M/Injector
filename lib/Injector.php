@@ -5,7 +5,7 @@ class Injector implements Container
 {
 
     const EX_CLASS_NOT_FOUND = 'The class %s cannot be found.';
-    const EX_PARAM_NOT_FOUND = 'No parameter found for %s::%s()::$%s.';
+    const EX_ARGUMENT_NOT_FOUND = 'No argument found for %s::%s()::$%s.';
     const EX_UNMAPPED_INTERFACE = 'The interface %s is not mapped to a concrete implementation.';
     const EX_UNMAPPED_ABSTRACT_CLASS = 'The abstract class %s is not mapped to a concrete implementation.';
     const EX_METHOD_NOT_CALLABLE = 'The method %s::%s() is not callable.';
@@ -104,13 +104,13 @@ class Injector implements Container
 
     /**
      * @param string $className
-     * @param array[string]mixed
+     * @param array[string]mixed $arguments
      *
      * @return object
      *
      * @throws InjectorException
      */
-    public function make($className, array $params = [])
+    public function make($className, array $arguments = [])
     {
         // Get the instance definition
         $instanceDef = $this->getInstanceDef($className);
@@ -127,7 +127,7 @@ class Injector implements Container
             $object = $this->invoke($factory, ['className' => $className, 'instanceName' => $instanceDef->getName()]);
         }
         else {
-            $object = $this->createObject($instanceDef, $params);
+            $object = $this->createObject($instanceDef, $arguments);
         }
 
         if ($instanceDef->isSingleton()) {
@@ -138,8 +138,8 @@ class Injector implements Container
             if (!is_callable([$object, $methodName])) {
                 throw new InjectorException(sprintf(self::EX_METHOD_NOT_CALLABLE, $className, $methodName));
             }
-            foreach ($method->getCalls() as $params) {
-                $this->invoke([$object, $methodName], $params);
+            foreach ($method->getCalls() as $arguments) {
+                $this->invoke([$object, $methodName], $arguments);
             }
         }
 
@@ -148,23 +148,23 @@ class Injector implements Container
 
     /**
      * @param callable $callable
-     * @param array[string]mixed $params
+     * @param array[string]mixed $arguments
      *
      * @return mixed The return type of the method/function being invoked.
      *
      * @throws InjectorException
      */
-    public function invoke(callable $callable, array $params = [])
+    public function invoke(callable $callable, array $arguments = [])
     {
         if (is_string($callable) && strpos($callable, '::') !== false) {
             $callable = explode('::', $callable);
         }
 
         if (is_array($callable)) {
-            return $this->invokeMethod($callable[0], $callable[1], $params);
+            return $this->invokeMethod($callable[0], $callable[1], $arguments);
         }
 
-        return $this->invokeFunction($callable, $params);
+        return $this->invokeFunction($callable, $arguments);
     }
 
     /**
@@ -184,35 +184,35 @@ class Injector implements Container
     /**
      * @param string|object $target
      * @param string $methodName
-     * @param array[string]mixed $params
+     * @param array[string]mixed $arguments
      *
      * @return mixed
      *
      * @throws InjectorException
      */
-    private function invokeMethod($target, $methodName, array $params)
+    private function invokeMethod($target, $methodName, array $arguments)
     {
         $reflectionMethod = (new \ReflectionClass($target))->getMethod($methodName);
-        $parameters = $this->getParameters($reflectionMethod->getParameters(), $params);
+        $arguments = $this->getArguments($reflectionMethod->getParameters(), $arguments);
         $object = (is_object($target)) ? $target : null;
 
-        return $reflectionMethod->invokeArgs($object, $parameters);
+        return $reflectionMethod->invokeArgs($object, $arguments);
     }
 
     /**
      * @param string|\Closure $function Name of the function or an instance of \Closure.
-     * @param array[string]mixed $params
+     * @param array[string]mixed $arguments
      *
      * @return mixed
      *
      * @throws InjectorException
      */
-    private function invokeFunction($function, array $params)
+    private function invokeFunction($function, array $arguments)
     {
         $reflectionFunction = new \ReflectionFunction($function);
-        $parameters = $this->getParameters($reflectionFunction->getParameters(), $params);
+        $arguments = $this->getArguments($reflectionFunction->getParameters(), $arguments);
 
-        return $reflectionFunction->invokeArgs($parameters);
+        return $reflectionFunction->invokeArgs($arguments);
     }
 
     /**
@@ -233,13 +233,13 @@ class Injector implements Container
 
     /**
      * @param InstanceDefinition $instanceDef
-     * @param array[string]mixed
+     * @param array[string]mixed $arguments
      *
      * @return object
      *
      * @throws InjectorException
      */
-    private function createObject(InstanceDefinition $instanceDef, array $params)
+    private function createObject(InstanceDefinition $instanceDef, array $arguments)
     {
         $className = $instanceDef->getClassName();
 
@@ -261,7 +261,7 @@ class Injector implements Container
 
         $this->currentlyMaking[] = $className;
         $methodDef = $instanceDef->getMethod('__construct');
-        $parameters = $this->getParameters($constructor->getParameters(), $params, $methodDef);
+        $parameters = $this->getArguments($constructor->getParameters(), $arguments, $methodDef);
 
         array_pop($this->currentlyMaking);
 
@@ -269,50 +269,50 @@ class Injector implements Container
     }
 
     /**
-     * @param \ReflectionParameter[] $reflectionParams
-     * @param array[string]mixed $params
+     * @param \ReflectionParameter[] $parameters
+     * @param array[string]mixed $args
      * @param MethodDefinition $methodDef
      *
      * @return mixed[]
      *
      * @throws InjectorException
      */
-    private function getParameters(array $reflectionParams, array $params, MethodDefinition $methodDef = null) {
+    private function getArguments(array $parameters, array $args, MethodDefinition $methodDef = null) {
 
-        $parameters = [];
-        foreach ($reflectionParams as $reflectionParam) {
-            $paramName = $reflectionParam->getName();
-            if (isset($params[$paramName])) {
-                $parameters[] = $this->resolveParameter($params[$paramName], $reflectionParam);
+        $arguments = [];
+        foreach ($parameters as $parameter) {
+            $paramName = $parameter->getName();
+            if (isset($args[$paramName])) {
+                $arguments[] = $this->resolveArgument($args[$paramName], $parameter);
             }
             else {
-                $parameters[] = $this->getParameter($reflectionParam, $methodDef);
+                $arguments[] = $this->getArgument($parameter, $methodDef);
             }
         }
 
-        return $parameters;
+        return $arguments;
     }
 
     /**
-     * @param \ReflectionParameter $reflectionParam
+     * @param \ReflectionParameter $parameter
      * @param MethodDefinition $methodDef
      *
      * @return mixed
      *
      * @throws InjectorException
      */
-    private function getParameter(\ReflectionParameter $reflectionParam, MethodDefinition $methodDef = null)
+    private function getArgument(\ReflectionParameter $parameter, MethodDefinition $methodDef = null)
     {
-        $paramName = $reflectionParam->getName();
+        $paramName = $parameter->getName();
 
         // Has a value been set for this parameter?
-        if ($methodDef !== null && $methodDef->hasParam($paramName)) {
-            $param = $methodDef->getParam($paramName);
-            return $this->resolveParameter($param, $reflectionParam);
+        if ($methodDef !== null && $methodDef->hasArgument($paramName)) {
+            $argument = $methodDef->getArgument($paramName);
+            return $this->resolveArgument($argument, $parameter);
         }
 
-        // Is the parameter an object?
-        if (($reflectionClass = $reflectionParam->getClass()) !== null) {
+        // Is the argument an object?
+        if (($reflectionClass = $parameter->getClass()) !== null) {
             try {
                 $className = $reflectionClass->getName();
                 if ($reflectionClass->isInterface() || $reflectionClass->isAbstract()) {
@@ -332,49 +332,49 @@ class Injector implements Container
             }
             catch (InjectorException $ex) {
                 // If this parameter has a default value return it.
-                if ($reflectionParam->isOptional()) {
-                    return $reflectionParam->getDefaultValue();
+                if ($parameter->isOptional()) {
+                    return $parameter->getDefaultValue();
                 }
 
                 throw $ex;
             }
         }
 
-        // No value has been found for this parameter and it cannot be automatically
+        // No argument value has been found for this parameter and it cannot be automatically
         // resolved because it's not an object so if it has a default value then return it.
-        if ($reflectionParam->isOptional()) {
-            return $reflectionParam->getDefaultValue();
+        if ($parameter->isOptional()) {
+            return $parameter->getDefaultValue();
         }
 
-        $className = $reflectionParam->getDeclaringClass()->getName();
-        $methodName = $reflectionParam->getDeclaringFunction()->getName();
+        $className = $parameter->getDeclaringClass()->getName();
+        $methodName = $parameter->getDeclaringFunction()->getName();
 
-        throw new InjectorException(sprintf(self::EX_PARAM_NOT_FOUND, $className, $methodName, $paramName));
+        throw new InjectorException(sprintf(self::EX_ARGUMENT_NOT_FOUND, $className, $methodName, $paramName));
     }
 
     /**
-     * Resolve a supplied parameter to its final value.
+     * Resolve a supplied argument to its final value.
      *
-     * A supplied parameter may be:
-     * 1. A string but the actual required parameter is an object so therefore the string(class name)
+     * A supplied argument may be:
+     * 1. A string but the actual required argument is an object so therefore the string(class name)
      * must be resolved into the actual required object.
      *
      * 2. A callable so therefore must be invoked to get its final value.
      *
-     * @param mixed $param
-     * @param \ReflectionParameter $reflectionParam
+     * @param mixed $argument
+     * @param \ReflectionParameter $parameter
      *
      * @return mixed
      *
      * @throws InjectorException
      */
-    private function resolveParameter($param, \ReflectionParameter $reflectionParam)
+    private function resolveArgument($argument, \ReflectionParameter $parameter)
     {
-        if (is_string($param) && $reflectionParam->getClass() !== null) {
-            return $this->make($param);
+        if (is_string($argument) && $parameter->getClass() !== null) {
+            return $this->make($argument);
         }
 
-        return (is_callable($param) && !$reflectionParam->isCallable()) ? $this->invoke($param) : $param;
+        return (is_callable($argument) && !$parameter->isCallable()) ? $this->invoke($argument) : $argument;
     }
 
 }

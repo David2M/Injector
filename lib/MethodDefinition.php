@@ -11,7 +11,7 @@ class MethodDefinition
     protected $methodName;
 
     /* @var array[string]mixed */
-    protected $params = [];
+    protected $arguments = [];
 
     /* @var array[string]mixed */
     protected $calls = [];
@@ -44,31 +44,31 @@ class MethodDefinition
      *
      * @return MethodDefinition
      */
-    public function setParam($name, $value)
+    public function setArgument($name, $value)
     {
-        $this->params[$name] = $value;
+        $this->arguments[$name] = $value;
         return $this;
     }
 
     /**
-     * @param array[string]mixed $params
+     * @param array[string]mixed $arguments
      *
      * @return MethodDefinition
      */
-    public function setParams(array $params)
+    public function setArguments(array $arguments)
     {
-        $this->params = $params;
+        $this->arguments = $arguments;
         return $this;
     }
 
     /**
-     * @param array[string]mixed $params
+     * @param array[string]mixed $arguments
      *
      * @return MethodDefinition
      */
-    public function addParams(array $params)
+    public function addArguments(array $arguments)
     {
-        $this->params = ($this->hasParams()) ? array_merge($this->params, $params) : $params;
+        $this->arguments = ($this->hasArguments()) ? array_merge($this->arguments, $arguments) : $arguments;
         return $this;
     }
 
@@ -77,43 +77,43 @@ class MethodDefinition
      *
      * @return bool
      */
-    public function hasParam($name)
+    public function hasArgument($name)
     {
-        return isset($this->params[$name]);
+        return isset($this->arguments[$name]);
     }
 
     /**
      * @return bool
      */
-    public function hasParams()
+    public function hasArguments()
     {
-        return !empty($this->params);
+        return !empty($this->arguments);
     }
 
     /**
      * @param string $name
      * @return mixed|null
      */
-    public function getParam($name) {
-        return ($this->hasParam($name)) ? $this->params[$name] : null;
+    public function getArgument($name) {
+        return ($this->hasArgument($name)) ? $this->arguments[$name] : null;
     }
 
     /**
      * @return array[string]mixed
      */
-    public function getParams()
+    public function getArguments()
     {
-        return $this->params;
+        return $this->arguments;
     }
 
     /**
-     * @param array[string]mixed $params
+     * @param array[string]mixed $arguments
      *
      * @return MethodDefinition
      */
-    public function addCall(array $params = [])
+    public function addCall(array $arguments = [])
     {
-        $this->calls[] = $params;
+        $this->calls[] = $arguments;
         return $this;
     }
 
