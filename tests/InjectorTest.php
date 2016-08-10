@@ -1,9 +1,11 @@
 <?php
+namespace Tests\David2M\Syringe;
+
 use David2M\Syringe\Injector;
 
 require('fixtures.php');
 
-class InjectorTest extends PHPUnit_Framework_TestCase
+class InjectorTest extends \PHPUnit_Framework_TestCase
 {
     /* @var Injector */
     private $injector;
@@ -169,12 +171,12 @@ class InjectorTest extends PHPUnit_Framework_TestCase
     public function testDelegateObjectCreationToFactory()
     {
         $this->injector->setFactory('^User$', function () {
-            return new User('John');
+            return new \User('John');
         });
 
         $obj = $this->injector->make('User');
 
-        $this->assertEquals(new User('John'), $obj);
+        $this->assertEquals(new \User('John'), $obj);
     }
 
     public function testInvokeFunction()
@@ -201,7 +203,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
 
     public function testInvokeClosureWithoutSupplyingValueForParam()
     {
-        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_PARAM_NOT_FOUND, 'InjectorTest', '{closure}', 'param'));
+        $this->setExpectedException('David2M\Syringe\InjectorException', sprintf(Injector::EX_PARAM_NOT_FOUND, self::class, 'Tests\David2M\Syringe\{closure}', 'param'));
 
         $this->injector->invoke(function ($param) {
         });
@@ -281,7 +283,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
 
     public function testShareAnObject()
     {
-        $user = new User('John');
+        $user = new \User('John');
         $this->injector->share([$user]);
 
         $obj = $this->injector->make('User');
@@ -291,7 +293,7 @@ class InjectorTest extends PHPUnit_Framework_TestCase
 
     public function testShareAnObjectWhileSettingTheInstanceName()
     {
-        $adapter = new PdoAdapter();
+        $adapter = new \PdoAdapter();
         $this->injector->share(['remote' => $adapter]);
 
         $obj = $this->injector->make('PdoAdapter#remote');

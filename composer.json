@@ -20,5 +20,10 @@
     "psr-4": {
       "David2M\\Syringe\\": "lib/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\David2M\\Syringe\\": "tests/"
+    }
   }
 }
