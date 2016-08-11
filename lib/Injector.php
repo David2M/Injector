@@ -261,11 +261,11 @@ class Injector implements Container
 
         $this->currentlyMaking[] = $className;
         $methodDef = $instanceDef->getMethod('__construct');
-        $parameters = $this->getArguments($constructor->getParameters(), $arguments, $methodDef);
+        $arguments = $this->getArguments($constructor->getParameters(), $arguments, $methodDef);
 
         array_pop($this->currentlyMaking);
 
-        return $reflectionClass->newInstanceArgs($parameters);
+        return $reflectionClass->newInstanceArgs($arguments);
     }
 
     /**
